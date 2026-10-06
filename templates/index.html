@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minimal Task Flow | Flask TODO</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <main class="card">
+      <header class="header">
+        <h1>Task Manager</h1>
+        <p>A simple Flask &amp; SQLite powered CRUD application</p>
+      </header>
+
+      <!-- Add Todo Form (Create) -->
+      <form action="{{ url_for('add') }}" method="POST" class="add-form">
+        <input 
+          type="text" 
+          name="title" 
+          placeholder="What do you need to do?" 
+          class="input-field" 
+          required 
+          autocomplete="off"
+          autofocus
+        >
+        <button type="submit" class="btn btn-primary">+ Add</button>
+      </form>
+
+      <!-- Task Stats -->
+      <div class="stats">
+        <span>Total: {{ todos|length }}</span>
+        <span>Completed: {{ todos|selectattr('completed', 'equalto', 1)|list|length }}</span>
+      </div>
+
+      <!-- Todo List (Read, Update, Delete) -->
+      {% if todos %}
+        <ul class="todo-list">
+          {% for todo in todos %}
+            <li class="todo-item {% if todo['completed'] %}completed{% endif %}" id="todo-{{ todo['id'] }}">
+              
+              <!-- Left side: Checkbox & Title -->
+              <div class="todo-left" id="display-{{ todo['id'] }}">
+                <form action="{{ url_for('toggle', todo_id=todo['id']) }}" method="POST" class="toggle-form">
+                  <input 
+                    type="checkbox" 
+                    class="toggle-checkbox" 
+                    onChange="this.form.submit()" 
+                    {% if todo['completed'] %}checked{% endif %}
+                    title="Toggle completion"
+                  >
+                </form>
+                <span class="todo-text">{{ todo['title'] }}</span>
+              </div>
+
+              <!-- Inline Edit Form (Hidden by default) -->
+              <form action="{{ url_for('update', todo_id=todo['id']) }}" method="POST" class="edit-form" id="edit-form-{{ todo['id'] }}">
+                <input type="text" name="title" value="{{ todo['title'] }}" class="edit-input" required>
+                <button type="submit" class="btn btn-primary btn-save">Save</button>
+                <button type="button" class="btn-cancel" onclick="cancelEdit({{ todo['id'] }})">Cancel</button>
+              </form>
+
+              <!-- Actions: Edit & Delete -->
+              <div class="todo-actions" id="actions-{{ todo['id'] }}">
+                <button 
+                  type="button" 
+                  class="btn-icon" 
+                  onclick="enableEdit({{ todo['id'] }})" 
+                  title="Edit task"
+                >
+                  ✎
+                </button>
+                <form action="{{ url_for('delete', todo_id=todo['id']) }}" method="POST" onsubmit="return confirm('Delete this task?');">
+                  <button type="submit" class="btn-icon delete" title="Delete task">
+                    ✕
+                  </button>
+                </form>
+              </div>
+
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="empty-state">
+          <p>No tasks yet. Add one above to get started!</p>
+        </div>
+      {% endif %}
+    </main>
+  </div>
+
+  <script>
+    function enableEdit(id) {
+      document.getElementById('display-' + id).style.display = 'none';
+      document.getElementById('actions-' + id).style.display = 'none';
+      const form = document.getElementById('edit-form-' + id);
+      form.style.display = 'flex';
+      const input = form.querySelector('input');
+      input.focus();
+      input.setSelectionRange(input.value.length, input.value.length);
+    }
+
+    function cancelEdit(id) {
+      document.getElementById('display-' + id).style.display = 'flex';
+      document.getElementById('actions-' + id).style.display = 'flex';
+      document.getElementById('edit-form-' + id).style.display = 'none';
+    }
+  </script>
+</body>
+</html>
