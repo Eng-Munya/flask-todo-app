@@ -32,9 +32,10 @@ flask-todo-app/
 
 ## How to Run
 
-1. Open a terminal in this directory:
-   ```powershell
-   cd "C:\Users\Bazzarry-Div\.gemini\antigravity-ide\scratch\flask-todo-app"
+1. Clone the repository and navigate to the project directory:
+   ```bash
+   git clone https://github.com/Eng-Munya/flask-todo-app.git
+   cd flask-todo-app
    ```
 
 2. Install dependencies:
